@@ -25,10 +25,27 @@ export default function Products() {
     const fetchProducts = async () => {
       try {
         setLoading(true);
+
         const data = await getProducts();
-        setProducts(data);
+
+        console.log("Products API Response:", data);
+
+        if (Array.isArray(data)) {
+          setProducts(data);
+        } else if (Array.isArray(data?.products)) {
+          setProducts(data.products);
+        } else if (Array.isArray(data?.data)) {
+          setProducts(data.data);
+        } else if (Array.isArray(data?.data?.products)) {
+          setProducts(data.data.products);
+        } else {
+          setProducts([]);
+        }
+
         setError("");
       } catch (err) {
+        console.log("Products API Error:", err);
+        setProducts([]);
         setError("Failed to load products. Please try again.");
       } finally {
         setLoading(false);
@@ -37,6 +54,8 @@ export default function Products() {
 
     fetchProducts();
   }, []);
+
+  const productList = Array.isArray(products) ? products : [];
 
   return (
     <div className="min-h-screen bg-[#f8f5f1]">
@@ -63,7 +82,7 @@ export default function Products() {
 
             <div className="rounded-[2rem] border border-white/10 bg-white/10 p-5 backdrop-blur-xl">
               <p className="text-white/60 text-sm">Available Products</p>
-              <h2 className="text-4xl font-black">{products.length}+</h2>
+              <h2 className="text-4xl font-black">{productList.length}+</h2>
             </div>
           </div>
         </div>
@@ -148,7 +167,7 @@ export default function Products() {
               <p className="text-gray-600">
                 Showing{" "}
                 <span className="font-black text-[#171717]">
-                  {products.length}
+                  {productList.length}
                 </span>{" "}
                 products
               </p>
@@ -171,23 +190,28 @@ export default function Products() {
               </div>
             )}
 
-            {!loading && !error && products.length === 0 && (
+            {!loading && !error && productList.length === 0 && (
               <div className="rounded-[2rem] bg-white p-10 text-center font-black text-[#171717] shadow-lg">
                 No products found.
               </div>
             )}
 
-            {!loading && !error && products.length > 0 && (
+            {!loading && !error && productList.length > 0 && (
               <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-8">
-                {products.map((product, index) => (
+                {productList.map((product, index) => (
                   <motion.div
-                    key={product._id}
+                    key={product._id || product.id || index}
                     initial={{ opacity: 0, y: 35 }}
                     whileInView={{ opacity: 1, y: 0 }}
                     viewport={{ once: true }}
                     transition={{ duration: 0.45, delay: index * 0.06 }}
                   >
-                    <ProductCard product={{ ...product, id: product._id }} />
+                    <ProductCard
+                      product={{
+                        ...product,
+                        id: product._id || product.id,
+                      }}
+                    />
                   </motion.div>
                 ))}
               </div>

@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import {
   Minus,
   Plus,
@@ -18,6 +19,8 @@ import {
 } from "../services/cartService";
 
 export default function Cart() {
+  const navigate = useNavigate();
+
   const [cart, setCart] = useState(null);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
@@ -65,6 +68,10 @@ export default function Cart() {
     } catch (error) {
       setMessage("Failed to remove product");
     }
+  };
+
+  const handleProceedToCheckout = () => {
+    navigate("/checkout");
   };
 
   useEffect(() => {
@@ -287,7 +294,10 @@ export default function Cart() {
                     />
                   </div>
 
-                  <button className="group mt-8 flex w-full items-center justify-center gap-2 rounded-2xl bg-[#171717] py-4 font-black text-white shadow-xl transition hover:bg-[#b8793a]">
+                  <button
+                    onClick={handleProceedToCheckout}
+                    className="group mt-8 flex w-full items-center justify-center gap-2 rounded-2xl bg-[#171717] py-4 font-black text-white shadow-xl transition hover:bg-[#b8793a]"
+                  >
                     Proceed To Checkout
                     <ArrowRight
                       size={20}
