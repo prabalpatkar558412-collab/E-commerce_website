@@ -17,6 +17,34 @@ export default function ProductDetails() {
   const [error, setError] = useState("");
   const [message, setMessage] = useState("");
 
+  const backendBaseUrl = import.meta.env.VITE_API_URL
+    ? import.meta.env.VITE_API_URL.replace("/api", "")
+    : "http://localhost:5000";
+
+  const getProductImageUrl = (image) => {
+    if (!image) {
+      return "https://placehold.co/800x800?text=No+Image";
+    }
+
+    if (image.startsWith("http://localhost:5000")) {
+      return image.replace("http://localhost:5000", backendBaseUrl);
+    }
+
+    if (image.startsWith("https://localhost:5000")) {
+      return image.replace("https://localhost:5000", backendBaseUrl);
+    }
+
+    if (image.startsWith("http")) {
+      return image;
+    }
+
+    if (image.startsWith("/uploads")) {
+      return `${backendBaseUrl}${image}`;
+    }
+
+    return `${backendBaseUrl}/uploads/${image}`;
+  };
+
   const isLoggedIn = () => {
     return !!localStorage.getItem("userInfo");
   };
@@ -102,13 +130,19 @@ export default function ProductDetails() {
     );
   }
 
+  const productImage = getProductImageUrl(product?.image);
+
   return (
     <div className="max-w-7xl mx-auto px-6 py-12">
       <div className="grid md:grid-cols-2 gap-12">
         <div className="bg-gray-100 rounded-3xl overflow-hidden">
           <img
-            src={product.image}
-            alt={product.name}
+            src={productImage}
+            alt={product?.name || "Product image"}
+            onError={(e) => {
+              e.currentTarget.src =
+                "https://placehold.co/800x800?text=No+Image";
+            }}
             className="w-full h-[520px] object-cover"
           />
         </div>
