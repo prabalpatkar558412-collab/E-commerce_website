@@ -15,6 +15,14 @@ export default function ProductCard({ product }) {
 
   const productId = product?._id || product?.id;
 
+  const backendBaseUrl = import.meta.env.VITE_API_URL
+    ? import.meta.env.VITE_API_URL.replace("/api", "")
+    : "http://localhost:5000";
+
+  const productImage = product?.image?.startsWith("http")
+    ? product.image
+    : `${backendBaseUrl}${product?.image}`;
+
   const isLoggedIn = () => {
     return !!localStorage.getItem("userInfo");
   };
@@ -35,9 +43,7 @@ export default function ProductCard({ product }) {
 
     try {
       setLoadingWishlist(true);
-
       await addToWishlist(productId);
-
       setWishlistAdded(true);
       alert("Product added to wishlist");
     } catch (error) {
@@ -66,7 +72,6 @@ export default function ProductCard({ product }) {
 
     try {
       setLoadingCart(true);
-
       await addToCart(productId, 1);
 
       setCartAdded(true);
@@ -93,8 +98,12 @@ export default function ProductCard({ product }) {
       <div className="relative overflow-hidden bg-[#f8f5f1]">
         <Link to={`/product/${productId}`}>
           <img
-            src={product.image}
-            alt={product.name}
+            src={productImage}
+            alt={product?.name || "Product image"}
+            onError={(e) => {
+              e.currentTarget.src =
+                "https://placehold.co/600x600?text=No+Image";
+            }}
             className="w-full h-80 object-cover transition duration-700 group-hover:scale-110"
           />
         </Link>
@@ -143,28 +152,28 @@ export default function ProductCard({ product }) {
           />
 
           <span className="text-sm font-semibold text-gray-700">
-            {product.rating || 4.5}
+            {product?.rating || 4.5}
           </span>
         </div>
 
         <Link to={`/product/${productId}`}>
           <h3 className="text-lg font-black text-[#171717] leading-snug hover:text-[#b8793a] transition">
-            {product.name}
+            {product?.name}
           </h3>
         </Link>
 
         <p className="text-sm text-gray-500 mt-2 mb-5">
-          {product.category}
+          {product?.category}
         </p>
 
         <div className="flex items-center justify-between">
           <div>
             <p className="text-2xl font-black text-[#171717]">
-              ₹{product.price}
+              ₹{product?.price}
             </p>
 
             <p className="text-sm text-gray-400 line-through">
-              ₹{Math.floor(product.price * 1.25)}
+              ₹{Math.floor((product?.price || 0) * 1.25)}
             </p>
           </div>
 
