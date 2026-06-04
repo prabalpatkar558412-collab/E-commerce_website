@@ -19,9 +19,31 @@ export default function ProductCard({ product }) {
     ? import.meta.env.VITE_API_URL.replace("/api", "")
     : "http://localhost:5000";
 
-  const productImage = product?.image?.startsWith("http")
-    ? product.image
-    : `${backendBaseUrl}${product?.image}`;
+  const getProductImageUrl = (image) => {
+    if (!image) {
+      return "https://placehold.co/600x600?text=No+Image";
+    }
+
+    if (image.startsWith("http://localhost:5000")) {
+      return image.replace("http://localhost:5000", backendBaseUrl);
+    }
+
+    if (image.startsWith("https://localhost:5000")) {
+      return image.replace("https://localhost:5000", backendBaseUrl);
+    }
+
+    if (image.startsWith("http")) {
+      return image;
+    }
+
+    if (image.startsWith("/uploads")) {
+      return `${backendBaseUrl}${image}`;
+    }
+
+    return `${backendBaseUrl}/uploads/${image}`;
+  };
+
+  const productImage = getProductImageUrl(product?.image);
 
   const isLoggedIn = () => {
     return !!localStorage.getItem("userInfo");
@@ -43,7 +65,9 @@ export default function ProductCard({ product }) {
 
     try {
       setLoadingWishlist(true);
+
       await addToWishlist(productId);
+
       setWishlistAdded(true);
       alert("Product added to wishlist");
     } catch (error) {
@@ -72,6 +96,7 @@ export default function ProductCard({ product }) {
 
     try {
       setLoadingCart(true);
+
       await addToCart(productId, 1);
 
       setCartAdded(true);
